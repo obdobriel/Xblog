@@ -6,12 +6,12 @@
         $style = '';
     ?>
     <div class="card-user-header bg-placeholder" style="{{ $style }}">
-        <h3 class="card-user-username">{{ $author or 'Author' }}</h3>
-        <h5 class="card-user-desc">{{ $description or 'Description' }}</h5>
+        <h3 class="card-user-username">{{ $author or 'Gabriel' }}</h3>
+        <h5 class="card-user-desc">{{ $description or 'coding keep moving' }}</h5>
     </div>
     <div class="card-user-image">
         <img class="rounded-circle"
-             src="{{ $avatar or 'https://raw.githubusercontent.com/lufficc/images/master/Xblog/logo.png' }}"
+             src="{{ $avatar or 'http://ox124gnrs.bkt.clouddn.com/image/JXs0wdHwyVgZPy3WpYepcZEvS1soiumWj4OOy5dv.jpeg' }}"
              alt="User Avatar">
     </div>
     <div class="card-user-footer">

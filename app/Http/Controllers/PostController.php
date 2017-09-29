@@ -30,10 +30,7 @@ class PostController extends Controller
     {
         $page_size = get_config('page_size', 7);
         $posts = $this->postRepository->pagedPosts($page_size);
-        $author = 'Gabriel';
-        $avatar = 'http://ox124gnrs.bkt.clouddn.com/image/JXs0wdHwyVgZPy3WpYepcZEvS1soiumWj4OOy5dv.jpeg';
-        $description = '一只快乐的程序猿';
-        return view('post.index', compact('posts', 'author', 'avatar', 'description'));
+        return view('post.index', compact('posts'));
     }
 
     public function show($slug)
