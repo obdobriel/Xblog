@@ -12,7 +12,7 @@
 */
 
 // Site route
-Route::get('/', ['uses' => 'PostController@index', 'as' => 'post.index']);
+Route::get('/', ['uses' => 'PostController@index', 'as' => 'index']);
 Route::get('/projects', ['uses' => 'HomeController@projects', 'as' => 'projects']);
 Route::get('/search', ['uses' => 'HomeController@search', 'as' => 'search']);
 Route::get('/achieve', ['uses' => 'HomeController@achieve', 'as' => 'achieve']);
