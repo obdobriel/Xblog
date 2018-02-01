@@ -10,7 +10,30 @@ use Log;
 
 class WechatsController extends Controller
 {
-    public function index(WechatRequest $request)
+    public function token(WechatRequest $request)
+    {
+        $config = [
+            'app_id'        => env('WX_APPID'),
+            'secret'        => env('WX_SECRET'),
+            'aes_key'       => env('WX_AES'),
+            'response_type' => 'array',
+            'log'           => [
+                'level' => 'debug',
+                'file'  => storage_path('logs/wechat.log'),
+            ],
+        ];
+        $app = Factory::officialAccount($config);
+    
+        $app->server->push(function ($message) {
+            return 'obdogabriel';
+        });
+        
+        $response = $app->server->serve();
+        
+        $response->send(); // Laravel 里请使用：return $response;
+    }
+    
+    public function index()
     {
         $config = [
             'app_id'        => env('WX_APPID'),
@@ -26,7 +49,7 @@ class WechatsController extends Controller
         
         $url = 'http://www.tuling123.com/openapi/api';
         
-        $app->server->push(function ($message) {
+        $app->server->push(function ($message) use ($url) {
             Log::info('wechat', $message);
             switch ($message['MsgType']) {
                 case 'event':
@@ -35,10 +58,17 @@ class WechatsController extends Controller
                 case 'text':
                     $params = [
                         'key' => env('TULIN_KEY'),
-                        'info' => '',
+                        'info' => $message['Content'],
+                        'userid' => $message['FromUserName']
                     ];
-                    return '收到文字消息';
-                    break;
+                    $res = $this->curl($url, $params, 1);
+                    Log::info('tulin', $res);
+                    if (100000 == $res['code']) {
+                        $msg = $res['text'];
+                    } else {
+                        $msg = '我不知道';
+                    }
+                    return $msg;
                 case 'image':
                     return '收到图片消息';
                     break;

@@ -12,7 +12,8 @@ $api->version('v1', [
         'limit'      => 1,
         'expires'    => 1,
     ], function ($api) {
-        $api->get('/', 'WechatsController@index')->name('wechat.index');
+        $api->get('/', 'WechatsController@token')->name('wechat.token');
+        $api->post('/', 'WechatsController@index')->name('wechat.index');
     });
 });
 
