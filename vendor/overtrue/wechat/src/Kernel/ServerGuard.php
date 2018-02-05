@@ -23,6 +23,7 @@ use EasyWeChat\Kernel\Support\XML;
 use EasyWeChat\Kernel\Traits\Observable;
 use EasyWeChat\Kernel\Traits\ResponseCastable;
 use Symfony\Component\HttpFoundation\Response;
+use Log;
 
 /**
  * Class ServerGuard.

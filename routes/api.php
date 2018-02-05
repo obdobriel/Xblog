@@ -9,7 +9,7 @@ $api->version('v1', [
 ], function ($api) {
     $api->group([
         'middleware' => 'api.throttle',
-        'limit'      => 1,
+        'limit'      => 60,
         'expires'    => 1,
     ], function ($api) {
         $api->get('/', 'WechatsController@token')->name('wechat.token');

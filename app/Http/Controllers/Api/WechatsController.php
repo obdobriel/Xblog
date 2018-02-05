@@ -16,6 +16,7 @@ class WechatsController extends Controller
             'app_id'        => env('WX_APPID'),
             'secret'        => env('WX_SECRET'),
             'aes_key'       => env('WX_AES'),
+	    'token' => env('WX_TOKEN'),
             'response_type' => 'array',
             'log'           => [
                 'level' => 'debug',
@@ -30,7 +31,7 @@ class WechatsController extends Controller
         
         $response = $app->server->serve();
         
-        $response->send(); // Laravel 里请使用：return $response;
+        return $response;
     }
     
     public function index()
@@ -38,6 +39,7 @@ class WechatsController extends Controller
         $config = [
             'app_id'        => env('WX_APPID'),
             'secret'        => env('WX_SECRET'),
+	    'token' => env('WX_TOKEN'),
             'aes_key'       => env('WX_AES'),
             'response_type' => 'array',
             'log'           => [
@@ -52,93 +54,61 @@ class WechatsController extends Controller
         $app->server->push(function ($message) use ($url) {
             Log::info('wechat', $message);
             switch ($message['MsgType']) {
-                case 'event':
-                    return '收到事件消息';
-                    break;
                 case 'text':
                     $params = [
                         'key' => env('TULIN_KEY'),
                         'info' => $message['Content'],
                         'userid' => $message['FromUserName']
                     ];
-                    $res = $this->curl($url, $params, 1);
-                    Log::info('tulin', $res);
-                    if (100000 == $res['code']) {
-                        $msg = $res['text'];
-                    } else {
-                        $msg = '我不知道';
-                    }
-                    return $msg;
-                case 'image':
-                    return '收到图片消息';
-                    break;
-                case 'voice':
-                    return '收到语音消息';
-                    break;
-                case 'video':
-                    return '收到视频消息';
-                    break;
-                case 'location':
-                    return '收到坐标消息';
-                    break;
-                case 'link':
-                    return '收到链接消息';
-                    break;
-                default:
-                    return '收到其它消息';
-                    break;
+                    $res = $this->curl($url, json_encode($params), 1);
+		    $data = json_decode($res, true);
+		    return $data['text'];
+                default :
+		    return "我是聊天机器人Gabriel。";
             }
         });
         
         $response = $app->server->serve();
-        
-        $response->send(); // Laravel 里请使用：return $response;
+  
+	return $response;
     }
     
-    /**
-     * @param $url 请求网址
-     * @param bool $params 请求参数
-     * @param int $ispost 请求方式
-     * @param int $https https协议
-     * @return bool|mixed
-     */
-    private function curl($url, $params = false, $ispost = 0, $https = 0)
-    {
-        $httpInfo = array();
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36');
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        if ($https) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // 对认证证书来源的检查
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE); // 从证书中检查SSL加密算法是否存在
-        }
-        if ($ispost) {
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-            curl_setopt($ch, CURLOPT_URL, $url);
-        } else {
-            if ($params) {
-                if (is_array($params)) {
-                    $params = http_build_query($params);
-                }
-                curl_setopt($ch, CURLOPT_URL, $url . '?' . $params);
-            } else {
-                curl_setopt($ch, CURLOPT_URL, $url);
-            }
-        }
-        
-        $response = curl_exec($ch);
-        
-        if ($response === FALSE) {
-            //echo "cURL Error: " . curl_error($ch);
-            return false;
-        }
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $httpInfo = array_merge($httpInfo, curl_getinfo($ch));
-        curl_close($ch);
-        return $response;
+/**
+ * @param $url    请求网址
+ * @param bool    $params 请求参数
+ * @param integer $isJson [description]
+ * @return bool|mixed
+ */
+function curl($url, $params = false, $isJson = 0)
+{
+    $httpInfo = [];
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36');
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    if ($isJson) {
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json; charset=utf-8',
+            'Content-Length:'.strlen($params)
+        ]);
+    };
+    
+    $response = curl_exec($ch);
+    
+    if ($response === FALSE) {
+        //echo "cURL Error: " . curl_error($ch);
+        return false;
     }
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $httpInfo = array_merge($httpInfo, curl_getinfo($ch));
+    curl_close($ch);
+
+    return $response;
+}
 }
